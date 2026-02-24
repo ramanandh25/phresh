@@ -1,0 +1,17 @@
+# Python build artifacts
+build/
+eggs/
+*.egg-info/
+
+# Virtual environments
+.venv/
+
+# C extensions
+*.so
+*.pyd
+*.dll
+
+# Cache
+__pycache__/
+
+.env
