@@ -1,4 +1,4 @@
-from typing import Callable, Type 
+from typing import Callable, Type
 from databases import Database
 from backend.app.db.repositories.base import BaseRepository
 
@@ -16,4 +16,3 @@ def get_repository(Repo_type: Type[BaseRepository]) -> Callable:
         return Repo_type(db)
 
     return _get_repo
-

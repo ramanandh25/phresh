@@ -21,6 +21,36 @@ dev = [
     "asgi-lifespan>=2.1.0",
     "mypy>=1.19.1",
     "pytest>=9.0.2",
+    "pytest-cov",
     "pytest-asyncio>=1.3.0",
     "ruff>=0.15.2",
+    "mypy"
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=backend --cov-report=term-missing"
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+
+[tool.coverage.run]
+show_missing=true
+source = ["backend"] 
+omit = [
+    "*/migrations/*",
+    "migrations/*",
+    "alembic/*",
+    "app/db/migrations/*"
 ]

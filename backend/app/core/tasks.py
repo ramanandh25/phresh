@@ -15,4 +15,3 @@ async def shutdown(app: FastAPI) -> None:
     Application shutdown logic.
     """
     await close_db_connection(app)
-
