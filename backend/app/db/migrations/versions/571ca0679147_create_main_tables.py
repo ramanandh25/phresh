@@ -23,7 +23,7 @@ def create_cleanings_table() -> None:
     """Create cleanings table."""
     op.create_table(
         "cleanings",
-        sa.Column("ID", sa.Integer, primary_key=True),
+        sa.Column("id", sa.Integer, primary_key=True),
         sa.Column("name", sa.Text, nullable=False, index=True),
         sa.Column("description", sa.Text, nullable=True),
         sa.Column(

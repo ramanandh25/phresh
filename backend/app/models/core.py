@@ -6,4 +6,4 @@ class CoreModel(BaseModel):
 
 
 class IdModelMixin(BaseModel):
-    ID: int
+    id: int

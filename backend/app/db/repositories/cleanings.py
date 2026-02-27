@@ -1,17 +1,42 @@
 from backend.app.db.repositories.base import BaseRepository
 from backend.app.models.cleanings import CleaningCreate, CleaningUpdate, CleaninginDb
-
+from fastapi import HTTPException
+from starlette.status import HTTP_400_BAD_REQUEST
 
 CREATE_CLEANING_QUERY = """
 INSERT INTO cleanings(name, description, price, cleaning_type)
 VALUES (:name, :description, :price, :cleaning_type)
-RETURNING "ID", name, description, price, cleaning_type
+RETURNING id, name, description, price, cleaning_type;
 """
 
 GET_CLEANING_BY_ID_QUERY = """
-SELECT "ID", name, description, price, cleaning_type
+SELECT id, name, description, price, cleaning_type
 FROM cleanings
-WHERE "ID" = :id
+WHERE id = :id
+"""
+
+GET_ALL_CLEANINGS_QUERY = """
+ SELECT id,name,description,price,cleaning_type
+ FROM cleanings
+
+"""
+
+UPDATE_CLEANING_BY_ID_QUERY = """
+    UPDATE cleanings 
+    SET name = :name,
+        description = :description,
+        price = :price,
+        cleaning_type = :cleaning_type
+    WHERE id= :id
+
+    RETURNING id,name,description,price,cleaning_type;
+    
+"""
+
+DELETE_CLEANING_BY_ID_QUERY = """
+DELETE FROM cleanings 
+WHERE id = :id
+RETURNING id;
 """
 
 
@@ -28,6 +53,52 @@ class CleaningsRepository(BaseRepository):
             query=GET_CLEANING_BY_ID_QUERY, values={"id": id}
         )
         if not cleaning:
-            print(f"For id {id} no cleaning found")
             return None
         return CleaninginDb(**cleaning)
+
+    async def get_all_cleanings(self) -> list[CleaninginDb]:
+        cleanings = await self.db.fetch_all(query=GET_ALL_CLEANINGS_QUERY)
+        return [CleaninginDb(**cleaning) for cleaning in cleanings]
+
+    async def update_cleaning(
+        self, *, id: int, cleaning_update: CleaningUpdate
+    ) -> CleaninginDb:
+
+        cleaning = await self.get_cleaning_by_id(id=id)
+        if not cleaning:
+            return None
+
+        updated_cleaning_params = cleaning.model_copy(
+            update=cleaning_update.model_dump(exclude_unset=True)
+        )
+
+        if updated_cleaning_params.cleaning_type is None:
+            raise HTTPException(
+                status_code=HTTP_400_BAD_REQUEST, detail="cleaning type cannot be None"
+            )
+
+        try:
+            updated_cleaning = await self.db.fetch_one(
+                query=UPDATE_CLEANING_BY_ID_QUERY,
+                values=updated_cleaning_params.model_dump(),
+            )
+
+            return CleaninginDb(**updated_cleaning)
+
+        except Exception as e:
+            print(e)
+            HTTPException(
+                status_code=HTTP_400_BAD_REQUEST, detail="Invalid update params"
+            )
+
+    async def delete_cleaning_by_id(self, *, id: int) -> int | None:
+        res = await self.get_cleaning_by_id(id=id)
+
+        if not res:
+            return None
+
+        deleted_id = await self.db.fetch_one(
+            query=DELETE_CLEANING_BY_ID_QUERY, values={"id": id}
+        )
+
+        return deleted_id["id"]

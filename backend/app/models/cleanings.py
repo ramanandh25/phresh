@@ -10,10 +10,10 @@ class CleaningType(str, Enum):
 
 
 class CleaningBase(CoreModel):
-    name: Optional[str]
-    description: Optional[str]
+    name: Optional[str] = None
+    description: Optional[str] = None
     cleaning_type: Optional[CleaningType] = "spot_clean"
-    price: Optional[float]
+    price: Optional[float] = None
 
 
 class CleaningCreate(CleaningBase):
@@ -22,7 +22,7 @@ class CleaningCreate(CleaningBase):
 
 
 class CleaningUpdate(CleaningBase):
-    cleaning_type: Optional[CleaningType]
+    cleaning_type: Optional[CleaningType] = None
 
 
 class CleaninginDb(IdModelMixin, CleaningBase):
