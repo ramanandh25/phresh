@@ -2,8 +2,11 @@ from fastapi import FastAPI
 from databases import Database
 from backend.app.core.config import DATABASE_URL, DB_MIN_CONNECTIONS, DB_MAX_CONNECTIONS        
 import logging 
+import os
+
 
 logger = logging.getLogger(__name__)
+
 
 async def connect_to_db(app: FastAPI) -> None:
     """
@@ -13,7 +16,8 @@ async def connect_to_db(app: FastAPI) -> None:
         app (FastAPI): The FastAPI application instance.
     """
     try:
-        database = Database(DATABASE_URL, min_size=DB_MIN_CONNECTIONS, max_size=DB_MAX_CONNECTIONS)
+        DB_URL = f"{DATABASE_URL}_test" if os.environ.get("TESTING") == "1" else DATABASE_URL
+        database = Database(DB_URL, min_size=DB_MIN_CONNECTIONS, max_size=DB_MAX_CONNECTIONS)
         await database.connect()
         app.state._db = database
         logger.info("Successfully connected to the database.")
