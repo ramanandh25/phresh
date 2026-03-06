@@ -12,6 +12,7 @@ from starlette.status import (
 )
 from backend.app.models.users import UserCreate, UserUpdate, UserInDB
 from backend.app.db.repositories.users import UsersRepository
+from backend.app.services import auth_service
 
 
 pytestmark = pytest.mark.asyncio
@@ -30,7 +31,7 @@ class TestUsersRoutes:
         assert res.status_code != HTTP_404_NOT_FOUND
 
 
-class TestCreateNewUser:
+class TestUserRegistration:
     async def test_users_can_register_successfully(
         self, app: FastAPI, client: AsyncClient, db: Database
     ) -> None:
@@ -59,9 +60,9 @@ class TestCreateNewUser:
         #created_user = UserInDB(
         #    **res.json(), password="random", salt="random"
         #).model_dump(exclude={"password", "salt"})
-        created_user = UserInDB(**res.json(),password="Pavan@1234",salt="123").model_dump(exclude = {"password","salt"})
+        created_user = UserInDB(**res.json(),password="Pavan@1234").model_dump(exclude = {"password"})
 
-        assert created_user == user_in_db.model_dump(exclude={"password", "salt"})
+        assert created_user == user_in_db.model_dump(exclude={"password"})
 
     @pytest.mark.parametrize(
         "attr,value,status_code",
@@ -113,3 +114,24 @@ class TestCreateNewUser:
         )
 
         assert res.status_code == status_code
+    
+    async def test_saved_password_is_hashed(self,
+                                            app:FastAPI,
+                                            client:AsyncClient,
+                                            db:Database)->None:
+        
+        user_repository = UsersRepository(db)
+        new_user = {"username":"Beyonce","email":"beyonce@gmail.com","password":"Password@123"}
+
+        res = await client.post(app.url_path_for("users:register-new-user"),json={"new_user":new_user})
+
+        assert res.status_code == HTTP_201_CREATED
+
+        user_in_db = await user_repository.get_user_by_email(email=new_user["email"])
+        assert user_in_db is not None
+        assert user_in_db.username == new_user["username"]
+        assert user_in_db.password!=new_user["password"]
+        assert auth_service.verify_password(
+            password=new_user["password"],
+            hashed_pw=user_in_db.password,
+        )

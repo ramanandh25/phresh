@@ -19,5 +19,5 @@ async def register_new_user(
     user_repo: UsersRepository = Depends(get_repository(UsersRepository)),
 ):
     created_user = await user_repo.register_new_user(new_user=new_user)
-    created_user = created_user.model_dump(exclude={"password","salt"})
+    created_user = created_user.model_dump(exclude={"password"})
     return UserPublic(**created_user)

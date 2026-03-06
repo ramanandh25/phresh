@@ -31,7 +31,7 @@ class UserBase(CoreModel):
 class UserCreate(CoreModel):
     username: str
     email: EmailStr
-    password: Annotated[str, Field(min_length=7, max_length=20)]
+    password: Annotated[str, Field(min_length=7, max_length=200)]
 
     @field_validator("password")
     @classmethod
@@ -59,8 +59,7 @@ class UserUpdate(CoreModel):
 
 
 class UserPasswordUpdate(CoreModel):
-    password: Annotated[str, Field(min_length=7, max_length=20)]
-    salt: str
+    password: Annotated[str, Field(min_length=7, max_length=200)]
 
     @field_validator("password")
     @classmethod
@@ -73,8 +72,7 @@ class UserInDB(IdModelMixin, DateTimeModelMixin, UserBase):
     Add in id, created_at, updated_at, and user's password and salt
     """
 
-    password: Annotated[str, Field(min_length=7, max_length=100)]
-    salt: str
+    password: Annotated[str, Field(min_length=7, max_length=200)]
 
     @field_validator("password")
     @classmethod
