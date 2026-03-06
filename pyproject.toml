@@ -10,8 +10,10 @@ dependencies = [
     "email-validator>=2.1",
     "fastapi>=0.110,<0.128",
     "httpx>=0.28.1",
+    "passlib[bcrypt]>=1.7.4",
     "psycopg2-binary>=2.9.11",
     "pydantic>=2.0.0",
+    "pyjwt>=2.11.0",
     "sqlalchemy>=2,<3",
     "uvicorn>=0.27",
 ]
